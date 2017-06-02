@@ -39,7 +39,7 @@ sem_t waitroom_seats;
 
 int waitroom_limit = 4;
 
-const int verbose = 2;
+const int verbose = 0;
 
 thread_queue *clients;
 
