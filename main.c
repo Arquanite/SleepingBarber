@@ -32,13 +32,14 @@ pthread_t monitor_thread;
 pthread_mutex_t waitroom = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t number = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t haircut = PTHREAD_MUTEX_INITIALIZER;
-//pthread_mutex_t resign = PTHREAD_MUTEX_INITIALIZER;
 
 sem_t waiting_clients;
 sem_t haircut_done;
 sem_t waitroom_seats;
 
 int waitroom_limit = 4;
+
+const int verbose = 2;
 
 thread_queue *clients;
 
@@ -66,16 +67,16 @@ void thread_start(void *val){
 
 void barber(){
     while(true){
-        printf("Barber is waiting for customers...\n");
+        if(verbose > 0) printf("Barber is waiting for customers...\n");
         sem_wait(&waiting_clients);
         pthread_mutex_lock(&waitroom);
-        printf("Barber wakes next customer\n");
+        if(verbose > 1)  printf("Barber wakes next customer\n");
         clients = queue_dequeue(clients);
-        printf("Barber is doing haircut\n");
+        if(verbose > 1)  printf("Barber is doing a haircut\n");
         pthread_cond_signal(clients->data.cond);
         pthread_mutex_unlock(&waitroom);
         sem_wait(&haircut_done);
-        printf("Barber has done haircut\n");
+        if(verbose > 1)  printf("Barber has done a haircut\n");
     }
 }
 
@@ -88,12 +89,11 @@ void new_client(){
 void client(pthread_cond_t *cond){
     // go to waitroom
     pthread_mutex_lock(&waitroom);
-    printf("New client arrives to waitroom...\n");
     //take number
     int id = take_number();
-    printf("Client takes number: %d\n", id);
+    if(verbose > 0) printf("New client takes number: %d\n", id);
     if(sem_trywait(&waitroom_seats) != 0){
-        printf("There's no free places!");
+        if(verbose > 0) printf("There's no free places! Client %d goes out\n", id);
         resign_count++;
         pthread_mutex_unlock(&waitroom);
         return;
@@ -101,14 +101,14 @@ void client(pthread_cond_t *cond){
     queue_enqueue(clients, cond, id);
     sem_post(&waiting_clients);
     // wait
-    printf("Client waits for haircut: %d\n", id);
+    if(verbose > 1)  printf("Client %d waits for haircut\n", id);
     pthread_cond_wait(cond, &waitroom);
     sem_post(&waitroom_seats);
     pthread_mutex_unlock(&waitroom);
 
     pthread_mutex_lock(&haircut);
     served = id;
-    printf("HAIRCUT: %d\n", id);
+    if(verbose > 0) printf("Client %d is getting a haircut\n", id);
     usleep(1000*3000);
     sem_post(&haircut_done);
     served = -1;
@@ -127,7 +127,7 @@ void monitor(){
         int waiting, x = 80, y=0;
         sem_getvalue(&waiting_clients, &waiting);
 
-        int served_len = 20, waiting_len = 23, resign_len = 15;
+        int served_len = 20, waiting_len = 23, resign_len = 21;
 
         if(served == -1) served_len = 0;
         else served_len += digit_count(served);
@@ -152,12 +152,15 @@ void monitor(){
         printf(" | Waiting clients: %*s%d/%d |", len-waiting_len, "", waiting, waitroom_limit);
 
         UstawKursor(x, y++);
-        printf(" | Resigned: %*s%d |", len-resign_len, "", resign_count);
+        printf(" | Resigned count: %*s%d |", len-resign_len, "", resign_count);
 
         UstawKursor(x, y++);
         printf(" +");
         for(int i=0; i<len-3; i++) printf("-");
         printf("+");
+
+        UstawKursor(x, y++);
+        for(int i=0; i<len; i++) printf(" ");
 
         UstawKursor(0, 24);
         usleep(10000);
