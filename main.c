@@ -19,19 +19,26 @@ void monitor();
 void barber();
 void new_client();
 
+int digit_count(int n);
+int bigger(int a, int b);
+
 int take_number();
 int client_count;
+int resign_count;
+int served = -1;
 
 pthread_t barber_thread;
 pthread_t monitor_thread;
 pthread_mutex_t waitroom = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t number = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t haircut = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t resign = PTHREAD_MUTEX_INITIALIZER;
 
 sem_t waiting_clients;
 sem_t haircut_done;
+sem_t waitroom_seats;
 
-int thread_count = 16;
+int waitroom_limit = 4;
 
 thread_queue *clients;
 
@@ -41,15 +48,13 @@ int main(){
     clients = queue_init();
     sem_init(&waiting_clients, 0, 0);
     sem_init(&haircut_done, 0, 0);
+    sem_init(&waitroom_seats, 0, waitroom_limit);
     pthread_create(&barber_thread, NULL, (void*) barber, NULL);
     pthread_create(&monitor_thread, NULL, (void*) monitor, NULL);
-    for(int i=0; i<thread_count; i++){
-        int r = rand()%500 + 300;
-        usleep(r*1000);
-        new_client();
-    }
     while(true){
-
+        ZmienTryb(true);
+        char a = getchar();
+        if(a == 'c') new_client();
     }
     pthread_exit(0);
 }
@@ -87,17 +92,26 @@ void client(pthread_cond_t *cond){
     //take number
     int id = take_number();
     printf("Client takes number: %d\n", id);
+    if(sem_trywait(&waitroom_seats) != 0){
+        printf("There's no free places!");
+        resign_count++;
+        pthread_mutex_unlock(&waitroom);
+        return;
+    }
     queue_enqueue(clients, cond, id);
     sem_post(&waiting_clients);
     // wait
     printf("Client waits for haircut: %d\n", id);
     pthread_cond_wait(cond, &waitroom);
+    sem_post(&waitroom_seats);
     pthread_mutex_unlock(&waitroom);
 
     pthread_mutex_lock(&haircut);
+    served = id;
     printf("HAIRCUT: %d\n", id);
-    sleep(1);
+    usleep(1000*3000);
     sem_post(&haircut_done);
+    served = -1;
     pthread_mutex_unlock(&haircut);
 }
 
@@ -110,28 +124,55 @@ int take_number(){
 
 void monitor(){
     while(true){
-        int a, x, y=0, len;
-        sem_getvalue(&waiting_clients, &a);
-        if(a != 0) len = floor(log10(a)) + 1;
-        else len = 1;
-        x = 80 - (22 + len);
+        int waiting, x = 80, y=0;
+        sem_getvalue(&waiting_clients, &waiting);
+
+        int served_len = 20, waiting_len = 23, resign_len = 15;
+
+        if(served == -1) served_len = 0;
+        else served_len += digit_count(served);
+
+        waiting_len += digit_count(waiting) + digit_count(waitroom_limit);
+        resign_len += digit_count(resign_count);
+
+        int len = bigger(served_len, bigger(waiting_len, resign_len));
+        x -= len;
+
         UstawKursor(x, y++);
         printf(" +");
-        for(int i=0; i<19+len; i++){
-            printf("-");
-        }
+        for(int i=0; i<len-3; i++) printf("-");
         printf("+");
+
+        if(served != -1){
+            UstawKursor(x, y++);
+            printf(" | Served client: %*s%d |", len-served_len, "", served);
+        }
+
         UstawKursor(x, y++);
-        printf(" | Waiting clients: %d |", a);
+        printf(" | Waiting clients: %*s%d/%d |", len-waiting_len, "", waiting, waitroom_limit);
+
+        UstawKursor(x, y++);
+        printf(" | Resigned: %*s%d |", len-resign_len, "", resign_count);
+
         UstawKursor(x, y++);
         printf(" +");
-        for(int i=0; i<19+len; i++){
-            printf("-");
-        }
+        for(int i=0; i<len-3; i++) printf("-");
         printf("+");
+
         UstawKursor(0, 24);
         usleep(10000);
     }
+}
+
+int digit_count(int n){
+    int count;
+    if(n != 0) count = floor(log10(n)) + 1;
+    else count = 1;
+    return count;
+}
+
+int bigger(int a, int b){
+    return a > b ? a : b;
 }
 
 void print_queue(thread_queue *queue){
