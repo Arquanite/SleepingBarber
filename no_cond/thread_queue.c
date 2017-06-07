@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-thread_data queue_enqueue(thread_queue *queue, pthread_cond_t *cond, int id){
+int queue_enqueue(thread_queue *queue, int id){
     while(queue->next != NULL){
         queue = queue->next;
     }
@@ -10,14 +10,12 @@ thread_data queue_enqueue(thread_queue *queue, pthread_cond_t *cond, int id){
 
     queue = queue->next;
     queue->next = NULL;
-    queue->data.id = id;
-    queue->data.cond = cond;
-    return queue->data;
+    queue->id = id;
+    return id;
 }
 
 thread_queue *queue_dequeue(thread_queue *first){
     thread_queue *second = first->next;
-    //pthread_cond_destroy(first->data.cond);
     free(first);
     return second;
 }

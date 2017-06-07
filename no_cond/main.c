@@ -14,7 +14,7 @@
 void thread_start(void *val);
 
 // Funkcja główna klienta - poczekalnia, strzyżenie itp.
-void client(pthread_cond_t *cond);
+void client();
 
 // Funkcja przydzielająca numery klientom (kasa biletowa)
 int take_number();
@@ -70,6 +70,7 @@ pthread_mutex_t haircut = PTHREAD_MUTEX_INITIALIZER;
 sem_t waiting_clients; // Semafor zliczający oczekujących klientów
 sem_t haircut_done; // Semafor informujący o zakończeniu strzyżenia
 sem_t waitroom_seats; // Semafor zliczający wolne miejsca w poczekalni
+sem_t barber_ready; // Semafor informujący o gotowości fryzjera (budzi klienta)
 
 // Liczba miejsc w poczekalni
 int waitroom_limit = 4;
@@ -105,9 +106,12 @@ int main(int argc, char *argv[]){
     sem_init(&waiting_clients, 0, 0);
     sem_init(&haircut_done, 0, 0);
     sem_init(&waitroom_seats, 0, waitroom_limit);
+    sem_init(&barber_ready, 0, 0);
 
     // Tworzenie wątku fryzjera
     pthread_create(&barber_thread, NULL, (void*) barber, NULL);
+
+    for(int i=0; i<64; i++) new_client();
 
     if(debug > 1) pthread_create(&frame_thread, NULL, (void*) frame_stats, NULL);
     while(true){
@@ -119,8 +123,8 @@ int main(int argc, char *argv[]){
 }
 
 void thread_start(void *val){
-    pthread_cond_t *cond = (pthread_cond_t*) val;
-    client(cond);
+    (void)(val);
+    client();
 }
 
 void barber(){
@@ -133,7 +137,7 @@ void barber(){
         clients = queue_dequeue(clients); // Uzyskanie danych klienta
         print_queue(clients, "Clients");
         if(verbose > 1) printf("Barber is doing a haircut\n");
-        pthread_cond_signal(clients->data.cond); // Obudzenie klienta
+        sem_post(&barber_ready); // Obudzenie klienta
         // Odblokowanie poczekalni aby klient mógł wejść do gabinetu
         pthread_mutex_unlock(&waitroom);
         sem_wait(&haircut_done); // Oczekiwanie na zakończenie strzyżenia
@@ -148,7 +152,7 @@ void new_client(){
     pthread_create(malloc(sizeof(pthread_t)), NULL, (void*) thread_start, (void*) cond);
 }
 
-void client(pthread_cond_t *cond){
+void client(){
     // Klient wchodzi do poczekalni
     pthread_mutex_lock(&waitroom);
     // Klient bierze numerek (id)
@@ -160,25 +164,26 @@ void client(pthread_cond_t *cond){
         if(verbose > 0) printf("There's no free seats! Client %d goes out\n", id);
         resign_count++;
         // Zwiększenie licznika i dodanie do kolejki zrezygnowanych
-        queue_enqueue(resigned, cond, id);
+        queue_enqueue(resigned, id);
         print_queue(resigned, "Resigned");
         print_stats();
         pthread_mutex_unlock(&waitroom);
         return;
     }
     // Dodanie klienta do kolejki
-    queue_enqueue(clients, cond, id);
+    queue_enqueue(clients, id);
     print_queue(clients, "Clients");
     // Zwiększenie liczby oczekujących klientów
     sem_post(&waiting_clients);
     print_stats();
     if(verbose > 1) printf("Client %d waits for haircut\n", id);
+    pthread_mutex_unlock(&waitroom);
     // Klient czeka na swoją kolej
-    pthread_cond_wait(cond, &waitroom);
+    sem_wait(&barber_ready);                                   // <-------------- TU TEŻ
     // Klient zwalnia miejsce w poczekalni
     sem_post(&waitroom_seats);
     // Klient opuszcza poczekalnie
-    pthread_mutex_unlock(&waitroom);
+
 
     // Wejście do gabinetu
     pthread_mutex_lock(&haircut);
@@ -316,7 +321,7 @@ void print_queue(thread_queue *queue, const char *name){
     printf("%s queue: { ", name);
     while(queue->next != NULL){
         queue = queue->next;
-        printf("%d, ", queue->data.id);
+        printf("%d, ", queue->id);
     }
     printf("}\n");
 }
