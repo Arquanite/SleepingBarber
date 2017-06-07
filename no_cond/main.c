@@ -111,8 +111,6 @@ int main(int argc, char *argv[]){
     // Tworzenie wątku fryzjera
     pthread_create(&barber_thread, NULL, (void*) barber, NULL);
 
-    for(int i=0; i<64; i++) new_client();
-
     if(debug > 1) pthread_create(&frame_thread, NULL, (void*) frame_stats, NULL);
     while(true){
         ZmienTryb(true); // Odczytywanie wejścia bez potrzeby wciskania klawisza Enter
@@ -179,7 +177,7 @@ void client(){
     if(verbose > 1) printf("Client %d waits for haircut\n", id);
     pthread_mutex_unlock(&waitroom);
     // Klient czeka na swoją kolej
-    sem_wait(&barber_ready);                                   // <-------------- TU TEŻ
+    sem_wait(&barber_ready);
     // Klient zwalnia miejsce w poczekalni
     sem_post(&waitroom_seats);
     // Klient opuszcza poczekalnie
