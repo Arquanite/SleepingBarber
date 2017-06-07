@@ -42,6 +42,7 @@
     showtabs=false,                  
     tabsize=4,
 }
+\lstset{style=customc, language=C}
 
 \begin{document}
 	\thispagestyle{empty}
@@ -144,27 +145,6 @@
 		\item \texttt{--waitroom-size}[count] - zmienia wielkość
 			poczekalni na \texttt{count}
 	\end{enumerate}
-	
-	\section{Wersja bez zmiennych warunkowych}
-	
-	\lstset{style=customc, language=C}
-	\begin{lstlisting}[label = kod, caption = rak]
-#include <stdio.h>
-#define N 10
-/* Block
-* comment */
-
-int main(){
-	int i;
-	cout<<"Hello world";
-	for(i=0; i<5; i++){
-		cout<<i<<endl;
-	}
-	return 0;
-}
-
-	\end{lstlisting}
-	
 	
 	\section{Wersja wykorzystująca zmienne warunkowe}
 	\subsection{Kolejka i zmienne warunkowe}
@@ -375,6 +355,26 @@ void client(pthread_cond_t *cond){
 	(\texttt{linia 9}) - zapobiega to zawołaniu przez fryzjera kolejnego
 	klienta zanim aktualnie obsługiwany nie zakończy strzyżenia - a 
 	następnie opuszcza gabinet (\texttt{linia 13}).
+	
+		\section{Wersja bez zmiennych warunkowych}
+	
+	\begin{lstlisting}[label = kod, caption = rak]
+#include <stdio.h>
+#define N 10
+/* Block
+* comment */
+
+int main(){
+	int i;
+	cout<<"Hello world";
+	for(i=0; i<5; i++){
+		cout<<i<<endl;
+	}
+	return 0;
+}
+
+	\end{lstlisting}
+	
 	
 	
 \end{document}
