@@ -1,0 +1,377 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=0.5in]{geometry}
+
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{setspace} %texlive-latex-recommended
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\setenumerate[1]{label=•}
+
+\newcommand{\imgz}{0.44\linewidth}
+\newcommand{\numerzajec}{2}
+\newcommand{\tematzajec}{Problem śpiącego fryzjera.}
+\newcommand{\datazajec}{8 czerwca 2017}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.92}	
+
+\renewcommand\lstlistingname{Fragment kodu}
+\lstdefinestyle{customc}{
+  	backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\scriptsize\color{codegray},
+    stringstyle=\color{codegreen},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+}
+
+\begin{document}
+	\thispagestyle{empty}
+	\begin{center}
+		\vspace*{1.6cm}
+		\includegraphics[width=0.55\linewidth]{pblogo.png}	\\
+		\vspace{0.5cm}
+		\large
+		\textsf{\textbf{Dokumentacja}} \\
+		\vspace{0.5cm}
+		\textsf{\textbf{\textit{Systemy operacyjne}}}	\\
+		\vspace{1cm}
+		\textsf{Projekt numer: \textbf{\numerzajec}}	\\
+		\vspace{0.5cm}
+		\textsf{Temat: \textbf{\tematzajec}}
+	\end{center}
+
+	\vspace{2cm}
+	\begin{tabular}{rl}
+        Wykonujący ćwiczenie: & \textbf{Adrian Kryński} \\
+                              &\textbf{Tobiasz Dzieszkowski} \\        									
+	\end{tabular}
+
+	\vspace{3.5cm}		
+
+	\begin{minipage}{0.45\linewidth}
+		\large
+		\begin{spacing}{1.5}
+		Studia dzienne \\
+		Kierunek: Informatyka \\
+		Semestr: IV \\
+		\end{spacing}
+	\end{minipage}
+	\begin{minipage}[t]{0.5\linewidth}
+		\large
+		\begin{spacing}{1.2}
+		Grupa zajęciowa: PS4
+		\end{spacing}
+	\end{minipage}
+	
+	Prowadzący ćwiczenie: \textbf{mgr inż. Daniel Reska} \\
+	
+	\begin{flushright}
+		\begin{minipage}[t]{0.3\linewidth}
+			\centering
+			................. \\
+			\small OCENA
+		\end{minipage}
+	\end{flushright}
+	
+	\begin{minipage}[t]{0.4\linewidth}
+		\centering
+		Data zajęć \\
+		\small \datazajec
+	\end{minipage}
+	
+	\begin{flushright}
+		\begin{minipage}[t]{0.5\linewidth}
+			\centering
+			............................................. \\
+			\small \textsf{Data i podpis prowadzącego}
+		\end{minipage}
+	\end{flushright}
+	\pagebreak
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	\section{Wstęp}
+	Celem projektu było napisanie programów koordynujących pracę
+	gabinetu z problemu \texttt{śpiącego fryzjera}:
+	\begin{enumerate}[label=\alph*)]
+		\item bez wykorzystania zmiennych warunkowych (tylko 
+			mutexy/semafory)
+		\item wykorzystując zmienne warunkowe
+	\end{enumerate}
+	
+	\section{Opcje programu}
+	Program udostępnia kilka opcji wspomagających obserwację jego
+	działania. Posiada on wartości \texttt{verbose} (domyślnie na 1), 
+	\texttt{debug} (domyślnie na 0), \texttt{haircut-time} (domyślnie
+	3000ms), oraz \texttt{waitroom-size} (domyślnie na 4). \\
+	Im wyższy poziom \texttt{verbose}, tym bardziej szczegółowe 
+	informacje na temat działania programu uzyskamy. \\
+	Czas strzyżenia (\texttt{haircut-time}) ustawiany jest w 
+	milisekundach, zaś wielkość poczekalni (\texttt{waitroom-size}) w
+	liczbie osób.
+	\begin{enumerate}
+		\item \texttt{--debug} - zmienia wartość \texttt{debug} na 1 - 
+			tradycyjny debug (np. \texttt{Res:2 WRomm: 5/10 [in: 4]})
+		\item \texttt{--debug-experimental} - zmienia wartość
+			\texttt{debug} na 2 (eksperymentalny - pływająca ramka)
+		\item \texttt{--no-verbose} - zmienia wartość \texttt{verbose}
+			na 0 (wyłącza)
+		\item \texttt{--very-verbose} - zmienia wartość \texttt{verbose}
+			na 2
+		\item \texttt{--haircut-time}[time] - zmienia czas strzyżenia na
+			\texttt{time}
+		\item \texttt{--waitroom-size}[count] - zmienia wielkość
+			poczekalni na \texttt{count}
+	\end{enumerate}
+	
+	\section{Wersja bez zmiennych warunkowych}
+	
+	\lstset{style=customc, language=C}
+	\begin{lstlisting}[label = kod, caption = rak]
+#include <stdio.h>
+#define N 10
+/* Block
+* comment */
+
+int main(){
+	int i;
+	cout<<"Hello world";
+	for(i=0; i<5; i++){
+		cout<<i<<endl;
+	}
+	return 0;
+}
+
+	\end{lstlisting}
+	
+	
+	\section{Wersja wykorzystująca zmienne warunkowe}
+	\subsection{Kolejka i zmienne warunkowe}
+	
+	\begin{center}
+		\begin{minipage}{0.8\linewidth}
+\begin{lstlisting}[caption = Struktura reprezentująca kolejkę.]
+typedef struct {
+int id;
+pthread_cond_t *cond;
+} thread_data;
+
+typedef struct thread_queue thread_queue;
+
+struct thread_queue {
+    thread_data data;
+    thread_queue *next;
+};
+\end{lstlisting}
+		\end{minipage}
+	\end{center}
+		
+	
+	Wersja wykorzystująca zmienne warunkowe posiada kolejkę 
+	\texttt{FIFO}, która zapewnia obsługę klientów (wątków) w kolejności 
+	\texttt{First Come First Served}.
+			
+	Każdy element w kolejce zawiera identyfikator (\texttt{id}) oraz
+	zmienną warunkową (\texttt{cond}) używaną do wybudzania wątku.
+	
+	\subsection{Mutexy}
+	
+	\begin{center}
+		\begin{minipage}{0.8\linewidth}
+\begin{lstlisting}[caption = Deklaracje mutexów.]
+// Mutex zabezpieczajacy poczekalnie
+pthread_mutex_t waitroom = PTHREAD_MUTEX_INITIALIZER;
+
+// Mutex zabezpieczajacy kase biletowa
+pthread_mutex_t number = PTHREAD_MUTEX_INITIALIZER;
+
+// Mutex zabezpieczajacy gabinet
+pthread_mutex_t haircut = PTHREAD_MUTEX_INITIALIZER;
+\end{lstlisting}
+		\end{minipage}
+	\end{center}
+	
+	W programie są wykorzystywane trzy mutexy:
+	\begin{enumerate}
+		\item \texttt{waitroom} - zapewnia że tylko jeden klient na raz
+			może zmieniać stan poczekalni
+		\item \texttt{number} - zabezpiecza kasę biletową dając do niej
+			dostęp jednemu klientowi na raz
+		\item \texttt{haircut} - zapewnia że tylko jeden klient
+			jednocześnie będzie w stanie wejść do gabinetu
+	\end{enumerate}
+	
+	\subsection{Semafory}
+	
+	\begin{center}
+		\begin{minipage}{0.8\linewidth}
+\begin{lstlisting}[caption = Deklaracje semaforów.]
+sem_t waiting_clients; // Semafor zliczajacy oczekujacych klientow
+sem_t haircut_done; // Semafor informujacy o zakonczeniu strzyzenia
+sem_t waitroom_seats; // Semafor zliczajacy wolne miejsca w poczekalni
+\end{lstlisting}
+		\end{minipage}
+	\end{center}
+	
+	W programie są wykorzystywane trzy semafory:
+	\begin{enumerate}
+		\item \texttt{waiting{\_}clients} - semafor odpowiedzialny za
+			zliczanie klientów oczekujących w poczekalni na strzyżenie
+		\item \texttt{haircut{\_}done} - semafor odpowiedzialny za
+			określenie kiedy strzyżenie zostało zakończone
+		\item \texttt{waitroom{\_}seats} - semafor odpowiedzialny za
+			zliczanie wolnych miejsc w poczekalni
+	\end{enumerate}
+	
+	\subsection{Fryzjer}	
+	
+	\begin{center}
+		\begin{minipage}{0.82\linewidth}
+\begin{lstlisting}[caption = Funkcja fryzjera.]
+void barber(){
+    while(true){
+        if(verbose > 0) printf("Barber is waiting for customers...\n");
+        sem_wait(&waiting_clients); // Oczekiwanie na klientow
+        // Sprawdzenie czy klienci zajeli swoje miejsca w poczekalni
+        pthread_mutex_lock(&waitroom);
+        if(verbose > 1) printf("Barber wakes next customer\n");
+        clients = queue_dequeue(clients); // Uzyskanie danych klienta
+        print_queue(clients, "Clients");
+        if(verbose > 1) printf("Barber is doing a haircut\n");
+        pthread_cond_signal(clients->data.cond); // Obudzenie klienta
+        // Odblokowanie poczekalni aby klient mogl wejsc do gabinetu
+        pthread_mutex_unlock(&waitroom);
+        sem_wait(&haircut_done); // Oczekiwanie na zakonczenie strzyzenia
+        if(verbose > 1) printf("Barber has done a haircut\n");
+    }
+}
+\end{lstlisting}
+		\end{minipage}
+	\end{center}
+	
+	Fryzjer na samym początku sprawdza czy w poczekalni znajdują się
+	jacyś klienci (\texttt{linia 4)}. Jeżeli nie ma - idzie spać do 
+	czasu aż nie zjawi się nowy klient. Jeżeli w poczekalni ktoś jest 
+	fryzjer upewnia się, że wszyscy oczekujący klienci zajęli swoje 
+	miejsca w poczekalni (\texttt{linia 6}) - zabezpiecza to przed
+	wyścigiem klientów, który może prowadzić do zakleszczenia.
+	
+	Fryzjer bierze dane pierwszego klienta z kolejki (\texttt{linia 8}),
+	a następnie go budzi używając zmiennej warunkowej 
+	(\texttt{linia 11}). 
+	
+	Następnie wraca do gabinetu i przebywa tam aż
+	do momentu zakończenia strzyżenia (\texttt{linie 13-14}). Zapobiega
+	to zawołaniu do gabinetu wielu klientów jednocześnie.
+	
+	\subsection{Klient}
+	
+	\begin{center}
+		\begin{minipage}{0.82\linewidth}
+\begin{lstlisting}[caption = Funkcja klienta 1/3.]
+void client(pthread_cond_t *cond){
+    // Klient wchodzi do poczekalni
+    pthread_mutex_lock(&waitroom);
+    // Klient bierze numerek (id)
+    int id = take_number();
+    if(verbose > 0) printf("New client takes number: %d\n", id);
+    // Klient probuje usiasc
+    if(sem_trywait(&waitroom_seats) != 0){
+        // Klient rezygnuje
+        if(verbose > 0) printf("There's no free seats! Client %d goes out\n", id);
+        resign_count++;
+        // Zwiekszenie licznika i dodanie do kolejki zrezygnowanych
+        queue_enqueue(resigned, cond, id);
+        print_queue(resigned, "Resigned");
+        print_stats();
+        pthread_mutex_unlock(&waitroom);
+        return;
+    }
+\end{lstlisting}
+		\end{minipage}
+	\end{center}
+	
+	Klient przed wejściem do poczekalni czeka aż poprzedni klient
+	zajmie swoje miejsce (usiądzie, pójdzie do gabinetu lub opuści salon
+	fryzjerski - \texttt{linia 3}). Zapobiega to wyścigom do kasy i na
+	krzesło w poczekalni. Po wejściu do poczekalni kieruje się do kasy 
+	biletowej, skąd pobiera numerek (przydzielenie \texttt{id} -
+	\texttt{linia 5}).
+	
+	Następnie klient sprawdza czy w poczekalni są wolne miejsca, jeżeli
+	nie ma to rezygnuje ze strzyżenia i wychodzi z poczekalni
+	(\texttt{linie 8-18}).
+	
+	\begin{center}
+		\begin{minipage}{0.8\linewidth}
+\begin{lstlisting}[caption = Funkcja klienta 2/3.]
+// Dodanie klienta do kolejki
+    queue_enqueue(clients, cond, id);
+    print_queue(clients, "Clients");
+    // Zwiekszenie liczby oczekujacych klientow
+    sem_post(&waiting_clients);
+    print_stats();
+    if(verbose > 1) printf("Client %d waits for haircut\n", id);
+    // Klient czeka na swoja kolej
+    pthread_cond_wait(cond, &waitroom);
+    // Klient zwalnia miejsce w poczekalni
+    sem_post(&waitroom_seats);
+    // Klient opuszcza poczekalnie
+    pthread_mutex_unlock(&waitroom);
+\end{lstlisting}
+		\end{minipage}
+	\end{center}
+	
+	Jeżeli w poczekalni są wolne miejsca, klient ustawia się w kolejce
+	(zajmuje wolne krzesło - \texttt{linie 2 i 5}), a następnie oczekuje
+	na swoją kolej (\texttt{linia 9}). Kiedy klient zostanie zawołany
+	przez fryzjera zwalnia krzesło w poczekalni (\texttt{linia 11}) i
+	opuszcza ją (\texttt{linia 13}).
+	
+	\begin{center}
+		\begin{minipage}{0.8\linewidth}
+\begin{lstlisting}[caption = Funkcja klienta 3/3.]
+// Wejscie do gabinetu
+    pthread_mutex_lock(&haircut);
+    // Ustawienie id aktualnie obslugiwanego klienta
+    served_client = id;
+    print_stats();
+    if(verbose > 0) printf("Client %d is getting a haircut\n", id);
+    usleep(1000*haircut_time);
+    // Zakonczenie strzyzenia
+    sem_post(&haircut_done);
+    served_client = -1;
+    print_stats();
+    // Opuszczenie poczekalni
+    pthread_mutex_unlock(&haircut);
+}
+\end{lstlisting}
+		\end{minipage}
+	\end{center}
+	
+	Klient wchodzi do gabinetu (\texttt{linia 2}), gdzie zostaje
+	ostrzyżony, po czym informuje fryzjera o zakończeniu wizyty
+	(\texttt{linia 9}) - zapobiega to zawołaniu przez fryzjera kolejnego
+	klienta zanim aktualnie obsługiwany nie zakończy strzyżenia - a 
+	następnie opuszcza gabinet (\texttt{linia 13}).
+	
+	
+\end{document}
