@@ -1,0 +1,58 @@
+W
+sem_t waiting_clients; // Semafor zliczający oczekujących klientów
+sem_t haircut_done; // Semafor informujący o zakończeniu strzyżenia
+sem_t waitroom_seats; // Semafor zliczający wolne miejsca w poczekalni
+
+N
+sem_t waiting_clients; // Semafor zliczający oczekujących klientów
+sem_t haircut_done; // Semafor informujący o zakończeniu strzyżenia
+sem_t waitroom_seats; // Semafor zliczający wolne miejsca w poczekalni
+sem_t barber_ready; // Semafor informujący o gotowości fryzjera (budzi klienta)
+
+
+
+
+
+
+
+BARBER
+W
+print_queue(clients, "Clients");
+if(verbose > 1) printf("Barber is doing a haircut\n");
+pthread_cond_signal(clients->data.cond); // Obudzenie klienta
+// Odblokowanie poczekalni aby klient mógł wejść do gabinetu
+pthread_mutex_unlock(&waitroom);
+sem_wait(&haircut_done); // Oczekiwanie na zakończenie strzyżenia
+
+N
+print_queue(clients, "Clients");
+if(verbose > 1) printf("Barber is doing a haircut\n");
+sem_post(&barber_ready); // Obudzenie klienta
+// Odblokowanie poczekalni aby klient mógł wejść do gabinetu
+pthread_mutex_unlock(&waitroom);
+sem_wait(&haircut_done); // Oczekiwanie na zakończenie strzyżenia
+
+CLIENT
+W
+print_stats();
+if(verbose > 1) printf("Client %d waits for haircut\n", id);
+// Klient czeka na swoją kolej
+pthread_cond_wait(cond, &waitroom);
+// Klient zwalnia miejsce w poczekalni
+sem_post(&waitroom_seats);
+// Klient opuszcza poczekalnie
+pthread_mutex_unlock(&waitroom);
+
+N
+print_stats();
+if(verbose > 1) printf("Client %d waits for haircut\n", id);
+pthread_mutex_unlock(&waitroom);
+// Klient czeka na swoją kolej
+sem_wait(&barber_ready);
+// Klient zwalnia miejsce w poczekalni
+sem_post(&waitroom_seats);
+// Klient opuszcza poczekalnie
+
+
+
+
