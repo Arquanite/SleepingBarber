@@ -182,7 +182,6 @@ void client(){
     sem_post(&waitroom_seats);
     // Klient opuszcza poczekalnie
 
-
     // Wejście do gabinetu
     pthread_mutex_lock(&haircut);
     // Ustawienie id aktualnie obsługiwanego klienta
