@@ -11,6 +11,7 @@
 \usepackage{tabularx}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{soul}
 
 \setenumerate[1]{label=•}
 
@@ -42,7 +43,7 @@
     showtabs=false,                  
     tabsize=4,
 }
-\lstset{style=customc, language=C}
+\lstset{style=customc, language=C, escapeinside={(*@}{@*)}}
 
 \begin{document}
 	\thispagestyle{empty}
@@ -366,7 +367,7 @@ void client(pthread_cond_t *cond){
 
 int main(){
 	int i;
-	cout<<"Hello world";
+	(*@ \hl{cout<<"Hello world";} @*)
 	for(i=0; i<5; i++){
 		cout<<i<<endl;
 	}
