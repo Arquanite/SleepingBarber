@@ -11,6 +11,7 @@
 \usepackage{tabularx}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{soul}
 
 \setenumerate[1]{label=•}
 
@@ -366,14 +367,21 @@ void client(pthread_cond_t *cond){
 	klienta zanim aktualnie obsługiwany nie zakończy strzyżenia - a 
 	następnie opuszcza gabinet (\texttt{linia 13}).
 	
-		\section{Wersja bez zmiennych warunkowych}
+	\pagebreak
+	\section{Wersja bez zmiennych warunkowych}
+
+	W wersji bez zmiennych warunkowych, zmienne "osobiste" każdego
+	wątku zostały zastąpione jednym wspólnym semaforem
+	\texttt{barber{\_}ready}. Jego zadaniem jest usypianie klientów
+	przed wejściem do gabinetu.
 
 	\begin{center}
 		\begin{minipage}{0.8\linewidth}
 \begin{lstlisting}[caption = Fryzjer ze zmiennymi warunkowymi.]
 print_queue(clients, "Clients");
 if(verbose > 1) printf("Barber is doing a haircut\n");
-pthread_cond_signal(clients->data.cond); // Obudzenie klienta
+(*@ \hl{pthread{\_}cond{\_}signal(clients-$>$data.cond);
+} @*)  // Obudzenie klienta
 // Odblokowanie poczekalni aby klient mogl wejsc do gabinetu
 pthread_mutex_unlock(&waitroom);
 sem_wait(&haircut_done); // Oczekiwanie na zakonczenie strzyzenia
@@ -386,7 +394,7 @@ sem_wait(&haircut_done); // Oczekiwanie na zakonczenie strzyzenia
 \begin{lstlisting}[caption = Fryzjer bez zmiennych warunkowych.]
 print_queue(clients, "Clients");
 if(verbose > 1) printf("Barber is doing a haircut\n");
-sem_post(&barber_ready); // Obudzenie klienta
+(*@ \hl{sem{\_}post(\&barber{\_}ready);} @*) // Obudzenie klienta
 // Odblokowanie poczekalni aby klient mogl wejsc do gabinetu
 pthread_mutex_unlock(&waitroom);
 sem_wait(&haircut_done); // Oczekiwanie na zakonczenie strzyzenia
@@ -394,13 +402,17 @@ sem_wait(&haircut_done); // Oczekiwanie na zakonczenie strzyzenia
 		\end{minipage}
 	\end{center}
 	
+	W przypadku fryzjera budzenie klientów za pomocą zmiennej
+	warunkowej zostało zamienione na zwiększenie wartości semafora.
+	Instrukcja znajduje się w tym samym miejscu w kodzie.
+	
 	\begin{center}
 		\begin{minipage}{0.8\linewidth}
 \begin{lstlisting}[caption = Klient ze zmiennymi warunkowymi.]
 print_stats();
 if(verbose > 1) printf("Client %d waits for haircut\n", id);
 // Klient czeka na swoja kolej
-pthread_cond_wait(cond, &waitroom);
+(*@ \hl{pthread{\_}cond{\_}wait(cond, \&waitroom);} @*)
 // Klient zwalnia miejsce w poczekalni
 sem_post(&waitroom_seats);
 // Klient opuszcza poczekalnie
@@ -417,13 +429,18 @@ print_stats();
 if(verbose > 1) printf("Client %d waits for haircut\n", id);
 pthread_mutex_unlock(&waitroom);
 // Klient czeka na swoja kolej
-sem_wait(&barber_ready);
+(*@ \hl{sem{\_}wait(\&barber{\_}ready)} @*);
 // Klient zwalnia miejsce w poczekalni
 sem_post(&waitroom_seats);
 // Klient opuszcza poczekalnie
 \end{lstlisting}
 		\end{minipage}
 	\end{center}
+	
+	W przypadku klienta instrukcja oczekiwania na fryzjera została
+	przeniesiona poza mutex \texttt{waitroom}. Zapobiega to
+	zakleszczeniu ponieważ oczekiwanie na semafor nie zwalnia mutexu.
+	
 
 	
 \end{document}
