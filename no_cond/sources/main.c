@@ -193,7 +193,7 @@ void client(){
     sem_post(&haircut_done);
     served_client = -1;
     print_stats();
-    // Opuszczenie poczekalni
+    // Opuszczenie gabinetu
     pthread_mutex_unlock(&haircut);
 }
 
